@@ -40,4 +40,8 @@ contextBridge.exposeInMainWorld('api', {
   importExcel: () => ipcRenderer.invoke('import:excel'),
   exportExcel: (filters) => ipcRenderer.invoke('export:excel', filters),
   exportPdf: (filters) => ipcRenderer.invoke('export:pdf', filters),
+  backup: {
+    createNow: () => ipcRenderer.invoke('backup:createNow'),
+    openFolder: () => ipcRenderer.invoke('backup:openFolder'),
+  },
 });

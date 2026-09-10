@@ -55,5 +55,16 @@
     }
   });
 
+  document.getElementById('backup-now-btn').addEventListener('click', async () => {
+    try {
+      const filePath = await window.api.backup.createNow();
+      window.Utils.toast(`Sauvegarde créée : ${filePath}`, 'success');
+      await window.api.backup.openFolder();
+    } catch (err) {
+      console.error(err);
+      window.Utils.toast(err.message || 'Échec de la sauvegarde', 'error');
+    }
+  });
+
   showScreen('dashboard');
 })();

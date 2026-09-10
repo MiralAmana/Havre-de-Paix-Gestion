@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { initDatabase } = require('./db');
@@ -6,6 +6,7 @@ const { importFromExcel } = require('./db/import-excel');
 const { buildReportData } = require('./db/reports');
 const { buildExcelReport } = require('./export/excel-report');
 const { buildPdfReport } = require('./export/pdf-report');
+const { runStartupBackup, createBackupNow, backupsDir } = require('./db/backup');
 
 let mainWindow;
 let repo;
@@ -100,10 +101,20 @@ function registerIpcHandlers() {
     fs.writeFileSync(filePath, buffer);
     return { canceled: false, filePath };
   });
+
+  // Backups
+  ipcMain.handle('backup:createNow', () => createBackupNow(dbPath));
+  ipcMain.handle('backup:openFolder', () => shell.openPath(backupsDir(dbPath)));
 }
 
+let dbPath;
+
 app.whenReady().then(() => {
-  const dbPath = path.join(app.getPath('userData'), 'havre-de-paix.sqlite');
+  dbPath = path.join(app.getPath('userData'), 'havre-de-paix.sqlite');
+
+  // Sauvegarde datée avant toute écriture de la session (une fois par jour, voir db/backup.js)
+  runStartupBackup(dbPath);
+
   const initialized = initDatabase(dbPath);
   repo = initialized.repo;
 
