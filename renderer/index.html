@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';" />
+  <title>Havre de Paix - Gestion</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <h1>Havre de Paix<small>Gestion</small></h1>
+      <button class="nav-btn" data-screen="dashboard">Tableau de bord</button>
+      <button class="nav-btn" data-screen="stock">Stock</button>
+      <button class="nav-btn" data-screen="produits">Produits</button>
+      <button class="nav-btn" data-screen="depenses">Dépenses</button>
+      <button class="nav-btn" data-screen="dettes">Dettes clients</button>
+      <div style="flex: 1"></div>
+      <button class="nav-btn" id="import-excel-btn">Importer depuis Excel</button>
+    </aside>
+    <main class="content">
+      <div class="content-header">
+        <h2 id="page-title">Tableau de bord</h2>
+        <div id="page-actions"></div>
+      </div>
+      <div id="view-root" class="view-root"></div>
+    </main>
+  </div>
+
+  <script src="assets/vendor/chart.umd.js"></script>
+  <script src="utils.js"></script>
+  <script src="screens/dashboard.js"></script>
+  <script src="screens/produits.js"></script>
+  <script src="screens/stock.js"></script>
+  <script src="screens/depenses.js"></script>
+  <script src="screens/dettes.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+{
+  "name": "havre-de-paix-gestion",
+  "version": "1.0.0",
+  "description": "Application de gestion (stock, dépenses, dettes clients) pour Havre de Paix",
+  "main": "main.js",
+  "scripts": {
+    "postinstall": "node scripts/copy-vendor.js",
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "chart.js": "4.5.1",
+    "exceljs": "^4.4.0",
+    "node-sqlite3-wasm": "0.8.60"
+  },
+  "devDependencies": {
+    "electron": "44.2.0",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "com.havredepaix.gestion",
+    "productName": "Havre de Paix - Gestion",
+    "files": [
+      "main.js",
+      "preload.js",
+      "db/**/*",
+      "export/**/*",
+      "renderer/**/*",
+      "assets/**/*"
+    ],
+    "win": {
+      "target": "nsis"
+    }
+  }
+}
