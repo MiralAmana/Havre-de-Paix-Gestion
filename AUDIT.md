@@ -29,3 +29,15 @@ Journal des changements notables du projet. Tenu à jour après chaque évolutio
 **Vérification faite** : testé directement contre la vraie base (hors clic UI) — sauvegarde du jour créée une seule fois même en appelant deux fois de suite, sauvegarde manuelle horodatée distincte créée sans écraser celle du jour, et purge confirmée sur un faux fichier vieux de 40 jours. Application relancée sans erreur avec la sauvegarde au démarrage active.
 
 **Limite connue** : ce n'est pas une sauvegarde hors-site — si tout l'ordinateur est perdu (vol, incendie), les sauvegardes locales ne protègent pas. Pas demandé pour l'instant, mais à garder en tête.
+
+## 2026-09-10 — Packaging en installeur Windows (.exe)
+
+**Ce qui a été fait** : `npm run dist` (config `electron-builder` déjà présente dans `package.json`, jamais testée jusqu'ici). Génère `dist/Havre de Paix - Gestion Setup 1.0.0.exe`, un installeur NSIS "one-click" (pas de droits admin requis, installation par utilisateur).
+
+**Vérification faite** :
+- Build terminé sans erreur (aucune dépendance native à recompiler, grâce au choix initial de `node-sqlite3-wasm`/`exceljs` plutôt que des paquets natifs).
+- Installeur exécuté réellement : installation dans `%LOCALAPPDATA%\Programs\havre-de-paix-gestion`, raccourcis créés sur le Bureau et dans le menu Démarrer, appli lancée automatiquement après installation.
+- Arbre de processus de l'appli installée vérifié sain (main + gpu + réseau + renderer), pointant vers le même dossier de données (`%AppData%\havre-de-paix-gestion`) que la version de développement — donc les données déjà saisies (produits, sauvegardes) sont immédiatement visibles dans l'appli installée.
+- L'ancienne instance lancée via `npm start` a été arrêtée pour éviter que deux copies de l'appli écrivent en même temps dans la même base.
+
+**Limite connue** : aucune icône personnalisée (icône Electron par défaut) — améliration cosmétique possible plus tard si voulu. Le `.exe` n'est pas signé avec un certificat (signature "auto" de `electron-builder`/Windows), donc Windows SmartScreen peut afficher un avertissement "éditeur inconnu" au premier lancement sur une autre machine — normal pour une appli non publiée, à accepter une fois.
