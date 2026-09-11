@@ -21,6 +21,12 @@ window.Utils = (function () {
     return new Date().toISOString().slice(0, 10);
   }
 
+  function icon(svgMarkup) {
+    const template = document.createElement('template');
+    template.innerHTML = svgMarkup.trim();
+    return template.content.firstChild;
+  }
+
   function el(tag, attrs, children) {
     const node = document.createElement(tag);
     Object.entries(attrs || {}).forEach(([key, value]) => {
@@ -64,5 +70,5 @@ window.Utils = (function () {
     }
   }
 
-  return { formatCFA, formatNumber, formatDate, today, el, toast, call };
+  return { formatCFA, formatNumber, formatDate, today, el, icon, toast, call };
 })();

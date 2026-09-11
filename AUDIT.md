@@ -40,4 +40,15 @@ Journal des changements notables du projet. Tenu à jour après chaque évolutio
 - Arbre de processus de l'appli installée vérifié sain (main + gpu + réseau + renderer), pointant vers le même dossier de données (`%AppData%\havre-de-paix-gestion`) que la version de développement — donc les données déjà saisies (produits, sauvegardes) sont immédiatement visibles dans l'appli installée.
 - L'ancienne instance lancée via `npm start` a été arrêtée pour éviter que deux copies de l'appli écrivent en même temps dans la même base.
 
+## 2026-09-11 — Refonte visuelle (skill UI/UX)
+
+**Ce qui a été fait** : nouveau système de design généré via le skill `ui-ux-pro-max` (style "Data-Dense Dashboard" — palette bleu marine/ambre, cartes KPI, tableaux denses), persisté dans [design-system/havre-de-paix-gestion/MASTER.md](design-system/havre-de-paix-gestion/MASTER.md) pour rester cohérent sur les prochains écrans.
+- [renderer/styles.css](renderer/styles.css) réécrit avec des jetons CSS (couleurs, ombres, rayons, transitions), cartes KPI avec badge d'icône et valeurs en police à chiffres tabulaires, tableaux zébrés avec surlignage au survol, focus clavier visible, `prefers-reduced-motion` respecté.
+- Icônes SVG (style contour, sans emoji) ajoutées à la barre latérale et aux cartes du tableau de bord ; helper `Utils.icon()` ajouté dans [renderer/utils.js](renderer/utils.js) pour injecter du SVG dans les vues.
+- **Écart assumé par rapport au système généré** : la police recommandée (Fira Sans/Fira Code, Google Fonts) demanderait une dépendance réseau à l'exécution — inacceptable pour une appli qui doit fonctionner hors-ligne dans la boutique. Remplacée par les polices Windows natives (Segoe UI / Consolas), qui donnent le même esprit (sans-serif propre + chiffres tabulaires) sans dépendance.
+
+**Vérification faite** : capture d'écran réelle de la fenêtre via le protocole de débogage Chrome DevTools d'Electron (`--remote-debugging-port`), pas juste une relecture de code — Tableau de bord, Stock et Dettes clients contrôlés visuellement.
+
+**Effet de bord détecté et corrigé pendant la vérification** : les doublons B00x fusionnés le 2026-09-10 étaient réapparus (le bouton "Importer depuis Excel" a dû être recliqué entre-temps — l'import ne sait pas qu'un produit a été fusionné/retiré depuis). Revérifié qu'aucun mouvement/dépense/dette n'y était rattaché avant de refusionner. **Limite non corrigée** : recliquer sur "Importer depuis Excel" reproduira ce doublon — l'import n'est pas au courant des fusions faites depuis dans l'appli.
+
 **Limite connue** : aucune icône personnalisée (icône Electron par défaut) — améliration cosmétique possible plus tard si voulu. Le `.exe` n'est pas signé avec un certificat (signature "auto" de `electron-builder`/Windows), donc Windows SmartScreen peut afficher un avertissement "éditeur inconnu" au premier lancement sur une autre machine — normal pour une appli non publiée, à accepter une fois.
