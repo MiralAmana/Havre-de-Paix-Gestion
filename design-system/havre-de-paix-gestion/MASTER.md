@@ -6,6 +6,17 @@
 
 ---
 
+> **BRAND OVERRIDE (2026-09-20) — supersedes the blue palette below.**
+> The client asked for a brown / white / beige / black theme matching her ADRI logo. The live tokens are in
+> `renderer/styles.css` (`:root`) and win over the generated palette table further down:
+> primary brown `#8B4A24` (hover `#6E3617`), terracotta `#A5521F` (active nav), sand accent `#E09F67` (decorative),
+> beige background `#FAF6EF`, muted beige `#F3EADC`, border `#E7DCCB`, warm black text `#1C1510`,
+> sidebar warm black `#171009`. Semantic colors (danger `#B3261E`, success `#2F6B2F`) are kept for meaning.
+> All text/background pairs were checked at ≥ 4.5:1. Logo: `renderer/assets/logo.svg` (full) and
+> `logo-mark.svg` (mark only), vectorized from the client's original image; app icon in `build/icon.ico`.
+
+---
+
 **Project:** Havre de Paix Gestion
 **Generated:** 2026-09-11 01:57:01
 **Category:** Analytics Dashboard

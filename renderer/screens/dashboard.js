@@ -134,7 +134,8 @@ window.Screens.dashboard = {
               {
                 label: "Chiffre d'affaires (CFA)",
                 data: salesByDay.map((r) => r.revenue),
-                backgroundColor: '#1d4ed8',
+                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--color-terracotta').trim() || '#a5521f',
+                borderRadius: 4,
               },
             ],
           },

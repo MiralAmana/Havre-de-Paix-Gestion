@@ -1,42 +1,48 @@
 /* Design system: see design-system/havre-de-paix-gestion/MASTER.md
-   Typography note: MASTER.md recommends Fira Sans / Fira Code (Google Fonts). This app
-   must work fully offline in the shop, so we honor the same intent — a clean humanist
-   sans for UI text, a monospaced/tabular face for figures — using fonts that ship with
-   Windows, avoiding any runtime dependency on a font CDN. */
+   Brand palette (2026-09-20): brown / beige / white / black, taken from the client's ADRI logo.
+   Typography: clean humanist sans for UI text + monospaced face for figures, using fonts that
+   ship with Windows so the app never depends on the network. */
 
 :root {
   --font-sans: "Segoe UI", "Segoe UI Variable", -apple-system, Roboto, Arial, sans-serif;
   --font-mono: "Cascadia Mono", "Consolas", "Courier New", monospace;
 
-  --color-primary: #1e40af;
-  --color-primary-hover: #1e3a8a;
+  /* Brand */
+  --color-primary: #8b4a24;          /* brown — buttons, links (6.8:1 on white) */
+  --color-primary-hover: #6e3617;
   --color-on-primary: #ffffff;
-  --color-accent: #d97706;
+  --color-terracotta: #a5521f;       /* active nav state (5.5:1 with white text) */
+  --color-accent: #e09f67;           /* sand/amber from the logo — decorative only */
 
-  --color-bg: #f8fafc;
+  /* Surfaces & text (beige / white / warm black) */
+  --color-bg: #faf6ef;
   --color-surface: #ffffff;
-  --color-text: #0f172a;
-  --color-text-muted: #475569;
-  --color-border: #e2e8f0;
-  --color-muted-bg: #eef2f8;
+  --color-text: #1c1510;
+  --color-text-muted: #6a5a4a;
+  --color-border: #e7dccb;
+  --color-muted-bg: #f3eadc;
+  --color-row-hover: #ebddc8;
 
-  --color-success: #15803d;
-  --color-success-bg: #dcfce7;
-  --color-danger: #dc2626;
-  --color-danger-bg: #fee2e2;
-  --color-warning-bg: #fef3c7;
-  --color-warning-text: #92400e;
+  /* Semantic */
+  --color-success: #2f6b2f;
+  --color-success-bg: #e1f0dd;
+  --color-danger: #b3261e;
+  --color-danger-hover: #8f1d17;
+  --color-danger-bg: #fbe3df;
+  --color-warning-bg: #fbeacb;
+  --color-warning-text: #7a4a00;
 
-  --sidebar-bg: #0f172a;
-  --sidebar-bg-hover: rgba(255, 255, 255, 0.06);
-  --sidebar-active: #1e40af;
-  --sidebar-text: #cbd5e1;
-  --sidebar-text-muted: #64748b;
+  /* Sidebar (warm black) */
+  --sidebar-bg: #171009;
+  --sidebar-bg-hover: rgba(230, 216, 198, 0.08);
+  --sidebar-active: var(--color-terracotta);
+  --sidebar-text: #e6d8c6;
+  --sidebar-text-muted: #a8967f;
 
   --radius: 10px;
   --radius-sm: 6px;
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
-  --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.08);
+  --shadow-sm: 0 1px 2px rgba(60, 35, 15, 0.07);
+  --shadow-md: 0 4px 16px rgba(60, 35, 15, 0.10);
 
   --transition: 160ms ease;
 
@@ -68,6 +74,10 @@ body {
   outline-offset: 2px;
 }
 
+.sidebar :focus-visible {
+  outline-color: var(--color-accent);
+}
+
 .app-shell {
   display: flex;
   height: 100vh;
@@ -83,44 +93,46 @@ body {
   color: var(--sidebar-text);
   display: flex;
   flex-direction: column;
-  padding: 20px 14px;
+  padding: 18px 14px;
 }
 
-.sidebar h1 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 15px;
-  color: #fff;
-  margin: 4px 8px 24px;
-  line-height: 1.3;
+.brand {
+  margin-bottom: 18px;
 }
 
-.sidebar h1 .brand-mark {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, var(--color-primary), #3b82f6);
+.brand-logo {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 12px 0 10px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  flex-shrink: 0;
   box-shadow: var(--shadow-sm);
 }
 
-.sidebar h1 .brand-mark svg {
-  width: 16px;
-  height: 16px;
-  stroke: #fff;
-  fill: none;
+.brand-logo img {
+  height: 132px;
+  width: auto;
+  display: block;
 }
 
-.sidebar h1 small {
+.brand h1 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  margin: 12px 4px 0;
+  line-height: 1.3;
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+
+.brand h1 small {
   display: block;
   font-weight: 400;
   font-size: 11px;
   color: var(--sidebar-text-muted);
   margin-top: 1px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
 }
 
 .nav-btn {
@@ -162,7 +174,7 @@ body {
 
 .sidebar .nav-divider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(230, 216, 198, 0.12);
   margin: 12px 4px;
 }
 
@@ -223,7 +235,7 @@ body {
 
 .btn.secondary:hover {
   background: var(--color-muted-bg);
-  border-color: #cbd5e1;
+  border-color: #d6c6ae;
 }
 
 .btn.danger {
@@ -231,7 +243,7 @@ body {
 }
 
 .btn.danger:hover {
-  background: #b91c1c;
+  background: var(--color-danger-hover);
 }
 
 .btn.small {
@@ -370,7 +382,7 @@ tbody tr:nth-child(even) {
 }
 
 tbody tr:hover {
-  background: #e0e9f9;
+  background: var(--color-row-hover);
 }
 
 td:has(> .badge),
@@ -429,7 +441,7 @@ tr.warning-row:hover {
 .field input:focus,
 .field select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.12);
+  box-shadow: 0 0 0 3px rgba(139, 74, 36, 0.16);
 }
 
 /* ---------- Badges ---------- */
@@ -507,4 +519,41 @@ tr.warning-row:hover {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   font-weight: 600;
+}
+
+/* ---------- Modal dialog ---------- */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 21, 16, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  width: min(540px, 92vw);
+  box-shadow: 0 12px 40px rgba(28, 21, 16, 0.35);
+}
+
+.modal h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+.modal-sub {
+  margin: 0 0 16px;
+  color: var(--color-text-muted);
+}
+
+.modal-error {
+  color: var(--color-danger);
+  min-height: 18px;
+  margin: 0 0 10px;
+  font-size: 13px;
 }

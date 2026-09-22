@@ -18,6 +18,8 @@ function createWindow() {
     minWidth: 1024,
     minHeight: 700,
     title: 'Havre de Paix - Gestion',
+    icon: path.join(__dirname, 'renderer', 'assets', 'icon.png'),
+    backgroundColor: '#faf6ef',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,

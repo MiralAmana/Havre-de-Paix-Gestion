@@ -163,26 +163,78 @@ window.Screens.dettes = {
       return panel;
     }
 
+    // Electron does not support window.prompt(), so the payment form is a small in-page dialog.
     function openPaymentForm(debt) {
-      const amountStr = prompt(
-        `Montant du versement pour ${debt.client_name} (solde restant : ${formatCFA(debt.balance)}) :`
+      const amountInput = el('input', { type: 'number', step: '1', min: '0', value: '' });
+      const methodSelect = el(
+        'select',
+        {},
+        ['Espèces', 'Mobile Money', 'Carte', 'Virement', 'Autre'].map((m) => el('option', { value: m }, [m]))
       );
-      if (amountStr === null) return;
-      const amount = Number(amountStr);
-      if (!amount || amount <= 0) {
-        window.Utils.toast('Montant invalide', 'error');
-        return;
+      const dateInput = el('input', { type: 'date', value: today() });
+      const errorMsg = el('p', { class: 'modal-error' }, []);
+      const overlay = el('div', { class: 'modal-overlay' });
+
+      const onKey = (e) => {
+        if (e.key === 'Escape') close();
+      };
+      function close() {
+        overlay.remove();
+        document.removeEventListener('keydown', onKey);
       }
-      const method = prompt('Mode de paiement (espèces, mobile money, ...) — optionnel :') || null;
-      call(
-        window.api.debts.addPayment({
-          debt_id: debt.id,
-          date: today(),
-          amount,
-          payment_method: method,
-        }),
-        'Versement enregistré'
-      ).then(refresh);
+
+      const saveBtn = el('button', { class: 'btn' }, ['Enregistrer le versement']);
+      const cancelBtn = el('button', { class: 'btn secondary' }, ['Annuler']);
+      cancelBtn.addEventListener('click', close);
+      saveBtn.addEventListener('click', async () => {
+        const amount = Number(amountInput.value);
+        if (!amount || amount <= 0) {
+          errorMsg.textContent = 'Indiquez un montant valide.';
+          return;
+        }
+        if (amount > debt.balance + 0.0001) {
+          errorMsg.textContent = `Le versement dépasse le solde restant (${formatCFA(debt.balance)}).`;
+          return;
+        }
+        saveBtn.disabled = true;
+        try {
+          await call(
+            window.api.debts.addPayment({
+              debt_id: debt.id,
+              date: dateInput.value || today(),
+              amount,
+              payment_method: methodSelect.value,
+            }),
+            'Versement enregistré'
+          );
+          close();
+          refresh();
+        } catch (err) {
+          saveBtn.disabled = false;
+        }
+      });
+      amountInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') saveBtn.click();
+      });
+
+      const modal = el('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Ajouter un versement' }, [
+        el('h3', {}, ['Ajouter un versement']),
+        el('p', { class: 'modal-sub' }, [`${debt.client_name} — solde restant : ${formatCFA(debt.balance)}`]),
+        el('div', { class: 'form-grid' }, [
+          field('Montant reçu (CFA)', amountInput),
+          field('Mode de paiement', methodSelect),
+          field('Date', dateInput),
+        ]),
+        errorMsg,
+        el('div', { class: 'actions-cell' }, [saveBtn, cancelBtn]),
+      ]);
+      overlay.appendChild(modal);
+      overlay.addEventListener('mousedown', (e) => {
+        if (e.target === overlay) close();
+      });
+      document.addEventListener('keydown', onKey);
+      document.body.appendChild(overlay);
+      amountInput.focus();
     }
 
     await refresh();

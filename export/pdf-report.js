@@ -1,4 +1,15 @@
 const { BrowserWindow } = require('electron');
+const fs = require('fs');
+const path = require('path');
+
+function loadLogoSvg() {
+  try {
+    const svg = fs.readFileSync(path.join(__dirname, '..', 'renderer', 'assets', 'logo.svg'), 'utf8');
+    return svg.replace('<svg ', '<svg height="78" ');
+  } catch (err) {
+    return '';
+  }
+}
 
 function esc(value) {
   return String(value ?? '').replace(/[&<>"']/g, (c) => ({
@@ -54,23 +65,30 @@ function buildReportHtml(data) {
 <meta charset="UTF-8" />
 <style>
   * { box-sizing: border-box; }
-  body { font-family: Arial, Helvetica, sans-serif; color: #1f2937; padding: 24px; font-size: 12px; }
+  body { font-family: Arial, Helvetica, sans-serif; color: #1c1510; padding: 24px; font-size: 12px; }
   h1 { font-size: 20px; margin: 0 0 4px; }
-  .meta { color: #6b7280; margin-bottom: 16px; }
-  h2 { font-size: 14px; margin: 24px 0 8px; border-bottom: 2px solid #1d4ed8; padding-bottom: 4px; }
+  .meta { color: #6a5a4a; margin-bottom: 16px; }
+  h2 { font-size: 14px; margin: 24px 0 8px; border-bottom: 2px solid #8b4a24; padding-bottom: 4px; }
   .kpis { display: flex; flex-wrap: wrap; gap: 10px; }
-  .kpi { border: 1px solid #e2e6ea; border-radius: 6px; padding: 8px 12px; min-width: 150px; }
-  .kpi .label { font-size: 10px; color: #6b7280; text-transform: uppercase; }
+  .kpi { border: 1px solid #e7dccb; border-radius: 6px; padding: 8px 12px; min-width: 150px; background: #faf6ef; }
+  .kpi .label { font-size: 10px; color: #6a5a4a; text-transform: uppercase; }
   .kpi .value { font-size: 15px; font-weight: bold; margin-top: 2px; }
   table { width: 100%; border-collapse: collapse; margin-top: 6px; }
-  th, td { border: 1px solid #e2e6ea; padding: 5px 8px; text-align: left; font-size: 11px; }
-  th { background: #f4f6f8; }
-  .empty { color: #6b7280; font-style: italic; }
+  th, td { border: 1px solid #e7dccb; padding: 5px 8px; text-align: left; font-size: 11px; }
+  th { background: #f3eadc; }
+  .empty { color: #6a5a4a; font-style: italic; }
+  .header { display: flex; align-items: center; gap: 18px; margin-bottom: 14px; }
+  .header h1 { margin: 0; }
 </style>
 </head>
 <body>
-  <h1>Havre de Paix — Rapport de gestion</h1>
-  <div class="meta">Période : ${esc(period)} — généré le ${esc(new Date().toLocaleString('fr-FR'))}</div>
+  <div class="header">
+    ${loadLogoSvg()}
+    <div>
+      <h1>Havre de Paix — Rapport de gestion</h1>
+      <div class="meta">Période : ${esc(period)} — généré le ${esc(new Date().toLocaleString('fr-FR'))}</div>
+    </div>
+  </div>
 
   <div class="kpis">
     ${kpi('Valeur du stock', formatCFA(data.summary.stock_value))}
@@ -112,4 +130,4 @@ async function buildPdfReport(data) {
   }
 }
 
-module.exports = { buildPdfReport };
+module.exports = { buildPdfReport, buildReportHtml };

@@ -1,7 +1,11 @@
 const ExcelJS = require('exceljs');
 
 function headerRow(sheet) {
-  sheet.getRow(1).font = { bold: true };
+  sheet.getRow(1).eachCell((cell) => {
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF8B4A24' } };
+    cell.alignment = { vertical: 'middle' };
+  });
 }
 
 async function buildExcelReport(data) {
