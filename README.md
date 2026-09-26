@@ -18,6 +18,7 @@ Elle remplace un fichier Excel devenu fragile (blocs de tableaux dupliqués à c
 | **Dépenses** | Journal des dépenses (date, désignation, montant, produit lié facultatif) avec total sur la période |
 | **Dettes clients** | Clients, ventes à crédit, **versements partiels multiples** (Espèces, Mobile Money, Carte, Virement, Autre), solde restant ; un versement supérieur au solde est refusé |
 | **Sauvegarde** | Copie automatique de la base chaque jour au démarrage + bouton « Sauvegarder maintenant » |
+| **Mises à jour** | L'appli cherche seule les nouvelles versions sur GitHub (au démarrage, puis toutes les 4 h) et propose de redémarrer pour les installer ; les données sont conservées |
 
 Les rapports s'exportent en **Excel** (4 feuilles : Tableau de bord, Stock, Dépenses, Dettes clients) et en **PDF** (en-tête avec le logo ADRI).
 
@@ -30,7 +31,7 @@ Les rapports s'exportent en **Excel** (4 feuilles : Tableau de bord, Stock, Dép
 - **exceljs** pour l'import et l'export Excel
 - **Chart.js** 4 pour le graphique du tableau de bord
 - Interface en **HTML / CSS / JavaScript pur** (un fichier par écran, pas de framework), polices système Windows (Segoe UI / Consolas) pour rester 100 % hors-ligne
-- **electron-builder** pour l'installeur Windows (NSIS)
+- **electron-builder** pour l'installeur Windows (NSIS) et **electron-updater** pour les mises à jour automatiques (GitHub Releases)
 
 ---
 
@@ -51,10 +52,44 @@ npm start       # lance l'application
 npm run dist
 ```
 
-Produit `dist/Havre de Paix - Gestion Setup 1.0.0.exe` (~110 Mo) : installeur « en un clic », **sans droits administrateur**, installation par utilisateur dans `%LOCALAPPDATA%\Programs\havre-de-paix-gestion`, raccourcis Bureau et menu Démarrer. L'icône vient de `build/icon.ico`.
+Produit `dist/Havre-de-Paix-Gestion-Setup-1.0.0.exe` (~110 Mo) : installeur « en un clic », **sans droits administrateur**, installation par utilisateur dans `%LOCALAPPDATA%\Programs\havre-de-paix-gestion`, raccourcis Bureau et menu Démarrer. L'icône vient de `build/icon.ico`.
 
 - L'exécutable n'est **pas signé** : Windows SmartScreen peut afficher « éditeur inconnu » au premier lancement (« Informations complémentaires » → « Exécuter quand même »).
-- Après toute modification du code, **relancer `npm run dist`** : l'`.exe` existant ne se met pas à jour tout seul.
+- `npm run dist` construit uniquement en local (`--publish never`) : rien n'est envoyé sur GitHub. Pour livrer une mise à jour à la cliente, voir la section suivante.
+
+---
+
+## Publier une mise à jour (la cliente la reçoit toute seule)
+
+L'appli installée interroge les **Releases GitHub** du dépôt `MiralAmana/Havre-de-Paix-Gestion`. Un simple `git push` de code ne suffit pas : c'est la **publication d'une version** (un tag `vX.Y.Z`) qui déclenche la construction de l'installeur par GitHub Actions ([.github/workflows/release.yml](.github/workflows/release.yml)) et son dépôt dans les Releases.
+
+**Une seule fois — mise en place**
+
+1. Créer le dépôt GitHub `Havre-de-Paix-Gestion` en **public** : l'appli de la cliente lit les Releases sans identifiant, ce qui est impossible avec un dépôt privé. Le dépôt ne contient aucune donnée de la cliente (la base `.sqlite` est ignorée par git), mais `AUDIT.md` et ce README décrivent son activité : à relire avant de rendre le dépôt public.
+2. Relier et pousser :
+   ```bash
+   git remote add origin https://github.com/MiralAmana/Havre-de-Paix-Gestion.git
+   git push -u origin master
+   ```
+3. Publier la première version (celle que la cliente installera à la main, une seule fois) : `git tag v1.0.0 && git push origin v1.0.0`.
+
+**À chaque nouvelle version**
+
+```bash
+git add -A && git commit -m "Description du changement"
+npm version patch          # 1.0.0 → 1.0.1 : met à jour package.json, commit + tag v1.0.1
+git push --follow-tags     # envoie le code ET le tag → GitHub construit et publie
+```
+
+(`minor` / `major` à la place de `patch` pour un changement plus important.) Compter quelques minutes pour la construction ; suivre l'avancement dans l'onglet *Actions* du dépôt, puis vérifier que la Release contient bien `Havre-de-Paix-Gestion-Setup-X.Y.Z.exe` **et** `latest.yml` (c'est ce fichier que l'appli lit).
+
+**Côté cliente**
+
+- L'appli vérifie au démarrage puis toutes les 4 h, sans bruit si elle est hors-ligne. Quand une version est téléchargée, une fenêtre propose « Redémarrer maintenant » ou « Plus tard » (installation alors à la prochaine fermeture).
+- Les données et sauvegardes ne sont pas touchées ; la sauvegarde du jour est faite au premier lancement de la nouvelle version.
+- Les vérifications sont tracées dans `%AppData%\havre-de-paix-gestion\updates.log` (utile pour comprendre pourquoi une mise à jour n'arrive pas).
+- Une version **déjà installée avant l'ajout de ce mécanisme** ne sait pas se mettre à jour : il faut réinstaller une fois à la main.
+- Le numéro de version doit strictement augmenter : une Release au numéro plus petit ou égal est ignorée.
 
 ---
 
@@ -64,6 +99,7 @@ Produit `dist/Havre de Paix - Gestion Setup 1.0.0.exe` (~110 Mo) : installeur «
 |---|---|
 | Base de données | `%AppData%\havre-de-paix-gestion\havre-de-paix.sqlite` |
 | Sauvegardes | `%AppData%\havre-de-paix-gestion\backups\` |
+| Journal des mises à jour | `%AppData%\havre-de-paix-gestion\updates.log` |
 
 - La version de développement (`npm start`) et la version installée **partagent le même dossier** : ne pas ouvrir les deux en même temps.
 - Sauvegarde automatique au démarrage, **une par jour** (`havre-de-paix-AAAA-MM-JJ.sqlite`) ; sauvegardes de plus de **30 jours** supprimées automatiquement.
@@ -76,6 +112,7 @@ Produit `dist/Havre de Paix - Gestion Setup 1.0.0.exe` (~110 Mo) : installeur «
 
 ```
 main.js                 Processus principal : fenêtre, handlers IPC, exports, sauvegarde
+updater.js              Mises à jour automatiques (electron-updater → GitHub Releases)
 preload.js              Pont sécurisé : expose window.api.* à la page
 db/
   index.js              Ouvre la base et crée le dépôt de requêtes
@@ -94,6 +131,7 @@ renderer/
   screens/              dashboard.js · stock.js · produits.js · depenses.js · dettes.js
   assets/               logo.svg, logo-mark.svg, icon.png (+ vendor/ généré)
 build/icon.ico          Icône Windows (16 → 256 px)
+.github/workflows/      release.yml : construit et publie l'installeur quand on pousse un tag vX.Y.Z
 scripts/copy-vendor.js  Copie Chart.js (postinstall)
 design-system/          Système de design (palette d'origine remplacée par le thème marron, voir la note en tête)
 AUDIT.md                Journal des changements, à lire avant de toucher au projet
@@ -125,7 +163,8 @@ Ces points sont détaillés dans [AUDIT.md](AUDIT.md).
 - Pas de comptes utilisateurs ni de mot de passe : quiconque ouvre la session Windows accède aux données.
 - Pas de sauvegarde hors-site automatique (voir plus haut).
 - Windows uniquement (l'installeur n'est construit et testé que pour Windows).
-- Pas de mise à jour automatique : chaque nouvelle version se réinstalle avec un nouvel `.exe` (les données sont conservées).
+- Les mises à jour exigent une connexion internet et un dépôt GitHub **public** (voir la section dédiée) ; sans cela, l'appli continue de fonctionner normalement, simplement sans se mettre à jour.
+- L'installeur n'est pas signé : la mise à jour fonctionne quand même, mais Windows SmartScreen peut réagir à la première installation.
 
 ---
 

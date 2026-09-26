@@ -7,6 +7,7 @@ const { buildReportData } = require('./db/reports');
 const { buildExcelReport } = require('./export/excel-report');
 const { buildPdfReport } = require('./export/pdf-report');
 const { runStartupBackup, createBackupNow, backupsDir } = require('./db/backup');
+const { setupAutoUpdate } = require('./updater');
 
 let mainWindow;
 let repo;
@@ -122,6 +123,7 @@ app.whenReady().then(() => {
 
   registerIpcHandlers();
   createWindow();
+  setupAutoUpdate(() => mainWindow);
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

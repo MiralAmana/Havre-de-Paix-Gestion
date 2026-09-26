@@ -1,0 +1,30 @@
+name: Publier une version
+
+# Se déclenche quand on pousse un tag de version (ex. v1.0.1, créé par "npm version").
+# Construit l'installeur Windows et le publie dans les Releases GitHub,
+# d'où les applications installées récupèrent la mise à jour.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Construire et publier l'installeur
+        run: npx electron-builder --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

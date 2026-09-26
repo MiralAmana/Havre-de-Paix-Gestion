@@ -88,3 +88,28 @@ Journal des changements notables du projet. Tenu à jour après chaque évolutio
 **Points d'attention avant livraison** repris dans le README pour ne pas être oubliés : prix/bénéfices des bières par caisse au lieu de par bouteille, bouton « Importer depuis Excel » à retirer, bénéfice des 5 vins à 0, nom affiché (ADRI ou Havre de Paix — Gestion). Ils restent **non corrigés** (voir l'entrée du 2026-09-20).
 
 **Vérification faite** : chaque affirmation du README a été recoupée avec le code (`package.json`, `main.js`, `db/backup.js`, `db/schema.js`, feuilles de `export/excel-report.js`, chemins de données). Version de Node indiquée = celle réellement utilisée (22) ; aucune version minimale n'a été testée.
+
+## 2026-09-25 — Mises à jour automatiques via GitHub Releases
+
+**Demande** : que la cliente reçoive les mises à jour quand le code est poussé sur GitHub.
+
+**Ce qui a été fait**
+- Dépendance `electron-updater` (aucune faille nouvelle ; seul reste l'avertissement `uuid` déjà connu via `exceljs`).
+- [updater.js](updater.js) (nouveau, branché dans [main.js](main.js)) : vérifie les Releases au démarrage puis toutes les 4 h, télécharge en arrière-plan, puis propose « Redémarrer maintenant / Plus tard » (sinon installation à la fermeture). Silencieux hors-ligne ou sans Release publiée. Désactivé en développement (`npm start`). Journal dans `%AppData%\havre-de-paix-gestion\updates.log` (100 Ko max).
+- [package.json](package.json) : `build.publish` (GitHub, `MiralAmana/Havre-de-Paix-Gestion`, `releaseType: release` pour que la Release soit publiée et non en brouillon — un brouillon est invisible pour l'appli), `npm run dist` en `--publish never` (build local sans envoi), nom d'installeur sans espaces `Havre-de-Paix-Gestion-Setup-<version>.exe` (les espaces sont modifiés par GitHub et casseraient `latest.yml`). L'ancien nom d'installeur n'existe plus.
+- [.github/workflows/release.yml](.github/workflows/release.yml) : sur push d'un tag `v*`, GitHub Actions (Windows) construit et publie installeur + `latest.yml`. Procédure complète dans le [README](README.md#publier-une-mise-à-jour-la-cliente-la-reçoit-toute-seule).
+
+**Point clé** : un `git push` de code seul ne met rien à jour. Il faut publier une version : `npm version patch` puis `git push --follow-tags`.
+
+**Vérification faite**
+- Build réel : `latest.yml` cohérent avec le nom du fichier, `app-update.yml` dans l'appli pointant vers GitHub, configuration `releaseType` acceptée par electron-builder.
+- **Flux de mise à jour testé de bout en bout sur un serveur local** (pas sur GitHub) : appli 1.0.0 → détecte 1.0.1 → télécharge (vérification sha512) → installe à la fermeture → relance en 1.0.1, base de données intacte.
+- Appli installée normale (feed GitHub, dépôt pas encore créé) : la vérification reçoit un 404, l'enregistre dans le journal, et l'appli reste utilisable sans message.
+
+**Incident pendant le test** : à la fermeture de l'appli de test, l'installation automatique a réellement remplacé l'appli **installée sur ce PC** par la version de test 1.0.1 (dont le flux pointait vers mon serveur local). Constaté immédiatement : base de données, sauvegardes et données non touchées (fichier inchangé). Réparé : version propre 1.0.0 (flux GitHub) réinstallée et vérifiée, caches de mise à jour et journal de test supprimés.
+
+**Non testé — à vérifier au premier tag**
+- Le workflow GitHub Actions lui-même (impossible en local) : à surveiller dans l'onglet *Actions* au premier `v1.0.0`.
+- Le téléchargement depuis une vraie Release GitHub.
+- **Dépôt public obligatoire** : avec un dépôt privé, l'appli de la cliente ne peut pas lire les Releases (404). `AUDIT.md`/README (activité de la cliente, chiffres) deviendraient publics : à relire avant.
+- Une version installée **avant** cette fonctionnalité ne se met pas à jour : réinstallation manuelle unique.
