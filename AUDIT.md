@@ -143,3 +143,13 @@ Journal des changements notables du projet. Tenu à jour après chaque évolutio
 **Livraison à la cliente** : installer une seule fois `Havre-de-Paix-Gestion-Setup-1.0.1.exe` (copie locale dans `dist/` ou Release GitHub). Les versions suivantes se téléchargent et s'installent seules. L'installeur n'est toujours pas signé : Windows SmartScreen affiche « éditeur inconnu » au premier lancement (« Informations complémentaires » → « Exécuter quand même »).
 
 **Rappel pour la suite** : `npm version patch` puis `git push --follow-tags`. Le numéro de version doit strictement augmenter ; la Release doit rester publiée (pas en brouillon) et contenir `latest.yml` + l'exe.
+
+## 2026-11-08 — Réécriture en Rust évaluée (non retenue)
+
+**Demande** : savoir si l'application peut être réécrite en Rust.
+
+**Évaluation** : oui, techniquement. Deux voies possibles. La première, **Tauri 2** (backend Rust + interface web actuelle conservée), est la plus réaliste : le code est petit (~2 455 lignes de JS/HTML/CSS/SQL, 6 tables), le schéma SQLite resterait identique, et les briques Rust existent (`rusqlite` pour la base, `rust_xlsxwriter` pour l'export Excel, `calamine` pour l'import, `tauri-plugin-updater` pour les mises à jour, NSIS pour l'installeur). Gain principal : une appli d'environ 10 Mo au lieu de 117 Mo, moins de RAM et un démarrage plus rapide. La seconde, **interface 100 % Rust** (egui, Slint, Iced, Dioxus), imposerait de réécrire tous les écrans, tableaux, formulaires et modales, pour un résultat moins mature sur ce type d'application de gestion.
+
+**Points de coût identifiés** : pas d'équivalent direct à `printToPDF` pour le rapport PDF (le poste le plus lourd), dépendance au runtime **WebView2** (présent sur ce PC, à vérifier chez la cliente), signature obligatoire des mises à jour Tauri avec une clé à conserver, réinstallation manuelle unique lors du passage Electron → Tauri (données conservées si le fichier SQLite et le dossier `%AppData%` restent les mêmes), et toolchain Rust + MSVC sur la machine de build.
+
+**Décision** : **non retenue pour l'instant**. L'application Electron fonctionne et les mises à jour viennent d'être vérifiées de bout en bout ; une réécriture n'apporterait aucun gain fonctionnel à la cliente et introduirait un risque sur une appli déjà livrable. Un POC Tauri pourra être réalisé plus tard dans un dossier séparé si le besoin (taille, performance, apprentissage) se confirme. Les problèmes métier encore ouverts (prix des bières par caisse, bouton d'import Excel, bénéfice des vins à 0) sont indépendants du langage et restent à traiter en priorité.
