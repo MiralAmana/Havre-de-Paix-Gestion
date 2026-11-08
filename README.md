@@ -91,6 +91,8 @@ git push --follow-tags     # envoie le code ET le tag → GitHub construit et pu
 - Une version **déjà installée avant l'ajout de ce mécanisme** ne sait pas se mettre à jour : il faut réinstaller une fois à la main.
 - Le numéro de version doit strictement augmenter : une Release au numéro plus petit ou égal est ignorée.
 
+**Si la Release est en double** (deux Releases pour le même tag, l'une avec le `.exe` + `latest.yml`, l'autre avec le seul `.blockmap`) : c'est un défaut connu d'electron-builder quand la Release n'existe pas avant l'envoi. Le workflow la crée maintenant d'abord, donc cela ne doit plus se produire ; si ça arrive quand même, supprimer les Releases de ce tag dans GitHub (*Releases* → la Release → *Delete*) et publier un numéro de version supérieur.
+
 ---
 
 ## Où sont les données ?

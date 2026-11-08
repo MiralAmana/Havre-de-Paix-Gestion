@@ -113,3 +113,13 @@ Journal des changements notables du projet. Tenu à jour après chaque évolutio
 - Le téléchargement depuis une vraie Release GitHub.
 - **Dépôt public obligatoire** : avec un dépôt privé, l'appli de la cliente ne peut pas lire les Releases (404). `AUDIT.md`/README (activité de la cliente, chiffres) deviendraient publics : à relire avant.
 - Une version installée **avant** cette fonctionnalité ne se met pas à jour : réinstallation manuelle unique.
+
+## 2026-09-26 — Première publication (v1.0.0) : doublon de Release corrigé
+
+**Constat** : dépôt `MiralAmana/Havre-de-Paix-Gestion` créé (public), code poussé, tag `v1.0.0` poussé. Le workflow GitHub Actions « Publier une version » a **réussi** (toutes les étapes vertes) et a bien publié `Havre-de-Paix-Gestion-Setup-1.0.0.exe` et `latest.yml`. `latest.yml` est lisible (HTTP 200) et son empreinte correspond au fichier publié.
+
+**Défaut trouvé en vérifiant** : GitHub contient **deux** Releases `v1.0.0` (ids 397027474 : `.exe` + `latest.yml` ; 397027475 : `.exe.blockmap` seul). Cause : electron-builder envoie ses fichiers en parallèle et, la Release n'existant pas, en crée une par envoi (défaut connu, confirmé dans `electron-publish/gitHubPublisher.js`, `getOrCreateRelease`). Conséquence : le `.blockmap` n'est pas joignable par le lien du tag (404) → pas de téléchargement différentiel, donc mise à jour complète (~117 Mo) au lieu d'un delta ; `latest.yml` et le `.exe` restent joignables, donc la mise à jour fonctionne.
+
+**Correctif** ([.github/workflows/release.yml](.github/workflows/release.yml)) : nouvelle étape « Créer la Release » avant l'envoi (`gh release create`, ignorée si elle existe déjà) ; electron-builder réutilise alors la Release existante. YAML validé localement.
+
+**Non vérifié** : le correctif lui-même ne pourra être confirmé qu'au prochain tag (v1.0.1 : doit produire UNE seule Release avec les 3 fichiers). Le doublon de `v1.0.0` reste à supprimer à la main dans GitHub. La mise à jour réelle depuis GitHub (appli 1.0.0 installée → 1.0.1) n'a pas encore été observée.

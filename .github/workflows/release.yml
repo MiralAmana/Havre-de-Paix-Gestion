@@ -24,6 +24,16 @@ jobs:
 
       - run: npm ci
 
+      # electron-builder envoie ses fichiers en parallèle : si la Release n'existe pas encore,
+      # il en crée deux (constaté sur v1.0.0). On la crée d'abord ; il la réutilise.
+      - name: Créer la Release
+        shell: bash
+        run: >
+          gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1 ||
+          gh release create "$GITHUB_REF_NAME" --title "${GITHUB_REF_NAME#v}" --notes "Version ${GITHUB_REF_NAME#v}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Construire et publier l'installeur
         run: npx electron-builder --publish always
         env:
