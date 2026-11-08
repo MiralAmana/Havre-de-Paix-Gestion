@@ -52,7 +52,7 @@ npm start       # lance l'application
 npm run dist
 ```
 
-Produit `dist/Havre-de-Paix-Gestion-Setup-1.0.0.exe` (~110 Mo) : installeur « en un clic », **sans droits administrateur**, installation par utilisateur dans `%LOCALAPPDATA%\Programs\havre-de-paix-gestion`, raccourcis Bureau et menu Démarrer. L'icône vient de `build/icon.ico`.
+Produit `dist/Havre-de-Paix-Gestion-Setup-<version>.exe` (~117 Mo) : installeur « en un clic », **sans droits administrateur**, installation par utilisateur dans `%LOCALAPPDATA%\Programs\havre-de-paix-gestion`, raccourcis Bureau et menu Démarrer. L'icône vient de `build/icon.ico`.
 
 - L'exécutable n'est **pas signé** : Windows SmartScreen peut afficher « éditeur inconnu » au premier lancement (« Informations complémentaires » → « Exécuter quand même »).
 - `npm run dist` construit uniquement en local (`--publish never`) : rien n'est envoyé sur GitHub. Pour livrer une mise à jour à la cliente, voir la section suivante.
@@ -62,6 +62,8 @@ Produit `dist/Havre-de-Paix-Gestion-Setup-1.0.0.exe` (~110 Mo) : installeur « e
 ## Publier une mise à jour (la cliente la reçoit toute seule)
 
 L'appli installée interroge les **Releases GitHub** du dépôt `MiralAmana/Havre-de-Paix-Gestion`. Un simple `git push` de code ne suffit pas : c'est la **publication d'une version** (un tag `vX.Y.Z`) qui déclenche la construction de l'installeur par GitHub Actions ([.github/workflows/release.yml](.github/workflows/release.yml)) et son dépôt dans les Releases.
+
+> **État au 2026-11-08 : c'est fait.** Le dépôt est **public**, les versions `v1.0.0` et `v1.0.1` sont publiées, et la mise à jour automatique a été vérifiée de bout en bout (appli 1.0.0 installée → 1.0.1). La procédure « Une seule fois » ci-dessous est conservée pour mémoire ; pour la suite, aller directement à « À chaque nouvelle version ».
 
 **Une seule fois — mise en place**
 

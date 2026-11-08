@@ -123,3 +123,23 @@ Journal des changements notables du projet. Tenu à jour après chaque évolutio
 **Correctif** ([.github/workflows/release.yml](.github/workflows/release.yml)) : nouvelle étape « Créer la Release » avant l'envoi (`gh release create`, ignorée si elle existe déjà) ; electron-builder réutilise alors la Release existante. YAML validé localement.
 
 **Non vérifié** : le correctif lui-même ne pourra être confirmé qu'au prochain tag (v1.0.1 : doit produire UNE seule Release avec les 3 fichiers). Le doublon de `v1.0.0` reste à supprimer à la main dans GitHub. La mise à jour réelle depuis GitHub (appli 1.0.0 installée → 1.0.1) n'a pas encore été observée.
+
+## 2026-11-08 — Dépôt public + v1.0.1 : mise à jour GitHub réellement opérationnelle
+
+**Problème trouvé** : le dépôt `MiralAmana/Havre-de-Paix-Gestion` était **privé** (vérifié via l'API GitHub : `private: true`), alors que README et AUDIT le croyaient public. L'appli de la cliente, qui interroge les Releases **sans identifiant**, recevait donc `404` à chaque vérification : le mécanisme de mise à jour était correct, mais il ne pouvait rien voir.
+
+**Ce qui a été fait**
+- Dépôt passé en **public**. Conséquence assumée : le code, ce journal et le guide PDF sont désormais lisibles par tous. Aucune donnée de la cliente n'est dans le dépôt (les fichiers `.sqlite` sont ignorés par git).
+- Release `v1.0.0` **en double supprimée** (celle qui ne contenait que le `.blockmap`) ; il ne reste plus qu'une Release par version.
+- Correctif du workflow (créer la Release avant l'envoi) **commité et poussé** (`14385fb`).
+- **v1.0.1 publiée** (tag `v1.0.1`, commit `b78af7f`) : GitHub Actions a réussi ; la Release contient `Havre-de-Paix-Gestion-Setup-1.0.1.exe`, son `.blockmap` et `latest.yml`, tous accessibles sans authentification. L'appli 1.0.1 est identique à 1.0.0 : cette version sert de test de la chaîne.
+
+**Vérification réelle (pas seulement des requêtes HTTP)**
+- Appli **1.0.0 installée** sur ce PC lancée → journal : « Nouvelle version 1.0.1 trouvée, téléchargement… », puis « Version 1.0.1 téléchargée » en ~22 s.
+- Bouton « Redémarrer maintenant » → installation → relance automatique en **1.0.1**, puis « À jour (version 1.0.1) ».
+- Base de données intacte (même fichier, même dossier `%AppData%\havre-de-paix-gestion`).
+- `latest.yml` anonyme : HTTP 200, version 1.0.1 ; SHA-512 de l'exe téléchargé identique à celui publié. Copie locale : `dist/Havre-de-Paix-Gestion-Setup-1.0.1.exe`.
+
+**Livraison à la cliente** : installer une seule fois `Havre-de-Paix-Gestion-Setup-1.0.1.exe` (copie locale dans `dist/` ou Release GitHub). Les versions suivantes se téléchargent et s'installent seules. L'installeur n'est toujours pas signé : Windows SmartScreen affiche « éditeur inconnu » au premier lancement (« Informations complémentaires » → « Exécuter quand même »).
+
+**Rappel pour la suite** : `npm version patch` puis `git push --follow-tags`. Le numéro de version doit strictement augmenter ; la Release doit rester publiée (pas en brouillon) et contenir `latest.yml` + l'exe.
